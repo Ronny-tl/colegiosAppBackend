@@ -4,6 +4,7 @@ from Institucion.routers import router
 
 urlpatterns = [
     re_path(r'^misCursos$', views.misCursosApi, name="misCursos"),
+    re_path(r'^uploadImagenAlumno$', views.uploadImageAlumno, name="uploadImagenAlumno"),
     re_path(r'^loginAdmin$', views.loginAdminApi, name="loginAdmin"),
     re_path(r'^loginAlumno$', views.loginAlunmo, name="loginAlumno"),
     re_path(r'^detail$', views.detailApi, name="detail"),

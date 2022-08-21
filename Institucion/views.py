@@ -1,5 +1,7 @@
+from datetime import datetime
 from itertools import chain
 import json
+from xml.dom.minidom import DocumentFragment
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
@@ -7,6 +9,7 @@ from django.http.response import JsonResponse
 from django.core.mail import get_connection, EmailMultiAlternatives
 from django.template.loader import get_template
 from colegiosApp2 import settings
+from django.core.files.storage import FileSystemStorage
 
 from Institucion.models import Alumno, Admin, Honorarios, Matriculas, Profesor, Cursos, Tutor
 from Institucion.serializers import AlumnoSerializer, AdminSerializer, AdminsGetSerializer, HonorariosSerializer, MatriculaSerializer, ProfesorSerializer, CursosSerializer, TutorSerializer,AlumnoSerializerWithOutApoderado
@@ -203,10 +206,10 @@ def loginAlunmo(request):
             res = AlumnoSerializer(result, many=False)
             print(res['alumnoVerificado'].value)
             if(res['alumnoVerificado'].value == True):
-                return JsonResponse({"mensaje": 'Bienvenido ' + res.data['nombres'], "nombres": res.data['nombres']}, status=200)
+                return JsonResponse({"mensaje": 'Bienvenido ' + res.data['nombres'], "nombres": res.data['nombres'], "codigoAlumno": res.data['codigoAlumno']}, status=200)
             else:
                 return JsonResponse({"mensaje": "Hola "+ res['nombres'].value+", tu usuario aun no fue confirmado por el administrador"}, status=400)
-        except Admin.DoesNotExist:
+        except Alumno.DoesNotExist:
             return JsonResponse({"mensaje": "Usuario invalido!!"}, status=404)
         #resp_data = {'cantidadCursos': 1 }
 
@@ -247,3 +250,20 @@ def alumnoRegister(request):
             
             return JsonResponse("Alumno registrado exitosamente!!", safe=False)
         return JsonResponse(alumno_serializer.errors, status=404)
+
+
+@csrf_exempt
+def uploadImageAlumno(request):
+    if request.method == 'POST':
+        try:
+            user = Alumno.objects.get(codigoAlumno=request.POST.get('codigoAlumno'))
+            upload = request.FILES['imagen']
+            fss = FileSystemStorage(location='media/alumnos/')
+            file = fss.save(upload.name, upload)
+            # file_url = fss.url(file)
+            user.imagen = 'alumnos/'+upload.name
+            user.save()
+            return JsonResponse("Imagen del alumno actualizado exitosamente!!", safe=False)
+        except Alumno.DoesNotExist:
+            return JsonResponse("Error al actualizar la imagen del alumno", safe=False)
+

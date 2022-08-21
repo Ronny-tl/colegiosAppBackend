@@ -8,7 +8,6 @@ class TutorSerializer(serializers.ModelSerializer):
         fields='__all__'
         
 class AlumnoSerializer(serializers.ModelSerializer):
-    default=[]
     class Meta:
         model=Alumno
         fields='__all__'
@@ -25,7 +24,9 @@ class AlumnoSerializer(serializers.ModelSerializer):
             'codigoTutor': instance.codigoTutor.codigoTutor if instance.codigoTutor else "",
             'fechaNacimiento': instance.fechaNacimiento,
             'correo': instance.correo,
-            'alumnoVerificado': instance.alumnoVerificado
+            'alumnoVerificado': instance.alumnoVerificado,
+            'password': instance.password,
+            'imagen': instance.imagen.url if instance.imagen else ""
         }
 
 class AlumnoSerializerWithOutApoderado(serializers.ModelSerializer):
@@ -105,6 +106,8 @@ class MatriculaSerializer(serializers.ModelSerializer):
             'apellidosAlumno': instance.codigoAlumno.apellidos,
             'codigoCurso': instance.codigoCurso.codigoCurso,
             'nombreCurso': instance.codigoCurso.nombre,
+            'fechaInicioCurso': instance.codigoCurso.fechaInicio,
+            'fechaFinCurso': instance.codigoCurso.fechaFin,
             'codigoProfesor': instance.codigoCurso.codigoProfesor.codigoProfesor,
             'nombresProfesor': instance.codigoCurso.codigoProfesor.nombres,
             'apellidosProfesor': instance.codigoCurso.codigoProfesor.apellidos,

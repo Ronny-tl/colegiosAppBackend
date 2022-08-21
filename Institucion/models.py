@@ -32,6 +32,7 @@ class Alumno(models.Model):
     correo = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=100)
     alumnoVerificado = models.BooleanField()
+    imagen = models.ImageField(upload_to='alumnos', null=True)
 
     # def nombre_completo(self):
     #     return "{}, {}".format(self.apellidos, self.nombres)
