@@ -199,15 +199,33 @@ def loginAlunmo(request):
     if request.method == 'POST':
         data = JSONParser().parse(request)
         try:
-            result = Alumno.objects.get(numDocumento=data['usuario'])
-            if(data['usuario'] == data['password']):
-                res = AlumnoSerializer(result, many=False)
+            result = Alumno.objects.get(correo=data['correo'], password=data['password'])
+            res = AlumnoSerializer(result, many=False)
+            print(res['alumnoVerificado'].value)
+            if(res['alumnoVerificado'].value == True):
                 return JsonResponse({"mensaje": 'Bienvenido ' + res.data['nombres'], "nombres": res.data['nombres']}, status=200)
             else:
-                return JsonResponse({"mensaje": "Usuario invalido"}, status=400)
+                return JsonResponse({"mensaje": "Hola "+ res['nombres'].value+", tu usuario aun no fue confirmado por el administrador"}, status=400)
         except Admin.DoesNotExist:
             return JsonResponse({"mensaje": "Usuario invalido!!"}, status=404)
         #resp_data = {'cantidadCursos': 1 }
+
+
+
+# @csrf_exempt
+# def loginAlunmo(request):
+#     if request.method == 'POST':
+#         data = JSONParser().parse(request)
+#         try:
+#             result = Alumno.objects.get(correo=data['usuario'], password=data['password'])
+#             if(data['usuario'] == data['password']):
+#                 res = AlumnoSerializer(result, many=False)
+#                 return JsonResponse({"mensaje": 'Bienvenido ' + res.data['nombres'], "nombres": res.data['nombres']}, status=200)
+#             else:
+#                 return JsonResponse({"mensaje": "Usuario invalido"}, status=400)
+#         except Admin.DoesNotExist:
+#             return JsonResponse({"mensaje": "Usuario invalido!!"}, status=404)
+#         #resp_data = {'cantidadCursos': 1 }
 
 @csrf_exempt
 def alumnoRegister(request):
@@ -219,10 +237,10 @@ def alumnoRegister(request):
             template = get_template('template-email.html')
             content = template.render({'nombres': alumno_data['nombres']})
             msg = EmailMultiAlternatives(
-                'Gracias por registrarte',
+                'Gracias por registrarte en Centro de Tareas y Reforzamiento Los Álamos',
                 'Hola, te enviamos un correo por tu registro',
-                settings.EMAIL_HOST_USER,
-                ['ron29b@gmail.com']
+                '-==CentrosAPP (UNSA)==-',
+                [alumno_data['correo']]
             )
             msg.attach_alternative(content, 'text/html')
             msg.send()
