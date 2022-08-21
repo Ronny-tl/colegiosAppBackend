@@ -214,4 +214,4 @@ def alumnoRegister(request):
         if alumno_serializer.is_valid():
             alumno_serializer.save()
             return JsonResponse("Alumno registrado exitosamente!!", safe=False)
-        return JsonResponse(alumno_serializer.errors)
+        return JsonResponse(alumno_serializer.errors, status=404)
