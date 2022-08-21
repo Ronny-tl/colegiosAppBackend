@@ -4,6 +4,9 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from django.http.response import JsonResponse
+from django.core.mail import get_connection, EmailMultiAlternatives
+from django.template.loader import get_template
+from colegiosApp2 import settings
 
 from Institucion.models import Alumno, Admin, Honorarios, Matriculas, Profesor, Cursos, Tutor
 from Institucion.serializers import AlumnoSerializer, AdminSerializer, AdminsGetSerializer, HonorariosSerializer, MatriculaSerializer, ProfesorSerializer, CursosSerializer, TutorSerializer,AlumnoSerializerWithOutApoderado
@@ -213,5 +216,16 @@ def alumnoRegister(request):
         alumno_serializer = AlumnoSerializerWithOutApoderado(data = alumno_data)
         if alumno_serializer.is_valid():
             alumno_serializer.save()
+            template = get_template('template-email.html')
+            content = template.render({'nombres': alumno_data['nombres']})
+            msg = EmailMultiAlternatives(
+                'Gracias por registrarte',
+                'Hola, te enviamos un correo por tu registro',
+                settings.EMAIL_HOST_USER,
+                ['ron29b@gmail.com']
+            )
+            msg.attach_alternative(content, 'text/html')
+            msg.send()
+            
             return JsonResponse("Alumno registrado exitosamente!!", safe=False)
         return JsonResponse(alumno_serializer.errors, status=404)
