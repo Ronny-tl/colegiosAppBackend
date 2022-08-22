@@ -3,6 +3,7 @@ from Institucion import views
 from Institucion.routers import router
 
 urlpatterns = [
+     re_path(r'^misHonorarios$', views.misHonorarios, name="misHonorarios"),
     re_path(r'^misCursos$', views.misCursosApi, name="misCursos"),
     re_path(r'^misCursosAsignados$', views.misCursosAsignadosApi, name="misCursosAsignados"),
     re_path(r'^uploadImagenAlumno$', views.uploadImageAlumno, name="uploadImagenAlumno"),

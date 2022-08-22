@@ -208,6 +208,16 @@ def misCursosAsignadosApi(request):
             return JsonResponse("El docente no cuenta con cursos asignados", safe=False)
 
 @csrf_exempt
+def misHonorarios(request):
+    if request.method == 'GET':
+        try:
+            honorarios = Honorarios.objects.filter(codigoProfesor = request.GET['codigoProfesor'])
+            honorarios_serializer = HonorariosSerializer(honorarios, many=True)
+            return JsonResponse(honorarios_serializer.data, safe=False)
+        except Honorarios.DoesNotExist:
+            return JsonResponse("El docente no cuenta con honorarios", safe=False)
+
+@csrf_exempt
 def misHijosApi(request):
     if request.method == 'GET':
         try:
