@@ -198,6 +198,16 @@ def misCursosApi(request):
         #resp_data = {'cantidadCursos': 1 }
 
 @csrf_exempt
+def misCursosAsignadosApi(request):
+    if request.method == 'GET':
+        try:
+            cursos = Cursos.objects.filter(codigoProfesor = request.GET['codigoProfesor'])
+            curso_serializer = CursosSerializer(cursos, many=True)
+            return JsonResponse(curso_serializer.data, safe=False)
+        except Cursos.DoesNotExist:
+            return JsonResponse("El docente no cuenta con cursos asignados", safe=False)
+
+@csrf_exempt
 def misHijosApi(request):
     if request.method == 'GET':
         try:
@@ -239,6 +249,20 @@ def loginApoderado(request):
             return JsonResponse({"mensaje": "Usuario invalido!!"}, status=404)
         #resp_data = {'cantidadCursos': 1 }
 
+
+@csrf_exempt
+def loginDocente(request):
+    if request.method == 'POST':
+        data = JSONParser().parse(request)
+        try:
+            result = Profesor.objects.get(numDocumento=data['usuario'])
+            res = ProfesorSerializer(result, many=False)
+            if(res['numDocumento'].value == data['password']):
+                return JsonResponse({"mensaje": 'Bienvenido ' + res.data['nombres'], "nombres": res.data['nombres'], "codigoProfesor": res.data['codigoProfesor']}, status=200)
+            else:
+                return JsonResponse({"mensaje": "Usuario invalido!!"}, status=400)
+        except Profesor.DoesNotExist:
+            return JsonResponse({"mensaje": "Usuario invalido!!"}, status=404)
 # @csrf_exempt
 # def loginAlunmo(request):
 #     if request.method == 'POST':
@@ -305,3 +329,18 @@ def uploadImageApoderado(request):
             return JsonResponse("Imagen del apoderado actualizado exitosamente!!", safe=False)
         except Tutor.DoesNotExist:
             return JsonResponse("Error al actualizar la imagen del apoderado", safe=False)
+
+@csrf_exempt
+def uploadImageDocente(request):
+    if request.method == 'POST':
+        try:
+            user = Profesor.objects.get(codigoProfesor=request.POST.get('codigoProfesor'))
+            upload = request.FILES['imagen']
+            fss = FileSystemStorage(location='media/docentes/')
+            file = fss.save(upload.name, upload)
+            # file_url = fss.url(file)
+            user.imagen = 'docentes/'+upload.name
+            user.save()
+            return JsonResponse("Imagen del docente actualizado exitosamente!!", safe=False)
+        except Profesor.DoesNotExist:
+            return JsonResponse("Error al actualizar la imagen del docente", safe=False)
