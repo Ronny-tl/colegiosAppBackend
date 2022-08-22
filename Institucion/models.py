@@ -8,7 +8,7 @@ class Tutor(models.Model):
     apellidos = models.CharField(max_length=50, blank=True)
     tipoDocumento = models.CharField(max_length=50)
     numDocumento = models.CharField(max_length=15)
-
+    imagen = models.ImageField(upload_to='apoderados', null=True)
 
     # def nombre_completo(self):
     #     return "{}, {}".format(self.apellidos, self.nombres)

@@ -12,7 +12,7 @@ from colegiosApp2 import settings
 from django.core.files.storage import FileSystemStorage
 
 from Institucion.models import Alumno, Admin, Honorarios, Matriculas, Profesor, Cursos, Tutor
-from Institucion.serializers import AlumnoSerializer, AdminSerializer, AdminsGetSerializer, HonorariosSerializer, MatriculaSerializer, ProfesorSerializer, CursosSerializer, TutorSerializer,AlumnoSerializerWithOutApoderado
+from Institucion.serializers import AlumnoSerializer, AdminSerializer, AdminsGetSerializer, AlumnoTutorSerializer, HonorariosSerializer, MatriculaSerializer, ProfesorSerializer, CursosSerializer, TutorSerializer,AlumnoSerializerWithOutApoderado
 from rest_framework import viewsets
 # Create your views here.
 
@@ -198,6 +198,17 @@ def misCursosApi(request):
         #resp_data = {'cantidadCursos': 1 }
 
 @csrf_exempt
+def misHijosApi(request):
+    if request.method == 'GET':
+        try:
+            alumnos = Alumno.objects.filter(codigoTutor = request.GET['codigoApoderado'])
+            alumnos_serializer = AlumnoTutorSerializer(alumnos, many=True)
+            return JsonResponse(alumnos_serializer.data, safe=False)
+        except Alumno.DoesNotExist:
+            return JsonResponse("El usuario no cuenta con hijos registrados", safe=False)
+        #resp_data = {'cantidadCursos': 1 }
+
+@csrf_exempt
 def loginAlunmo(request):
     if request.method == 'POST':
         data = JSONParser().parse(request)
@@ -213,7 +224,20 @@ def loginAlunmo(request):
             return JsonResponse({"mensaje": "Usuario invalido!!"}, status=404)
         #resp_data = {'cantidadCursos': 1 }
 
-
+@csrf_exempt
+def loginApoderado(request):
+    if request.method == 'POST':
+        data = JSONParser().parse(request)
+        try:
+            result = Tutor.objects.get(numDocumento=data['usuario'])
+            res = TutorSerializer(result, many=False)
+            if(res['numDocumento'].value == data['password']):
+                return JsonResponse({"mensaje": 'Bienvenido ' + res.data['nombres'], "nombres": res.data['nombres'], "codigoTutor": res.data['codigoTutor']}, status=200)
+            else:
+                return JsonResponse({"mensaje": "Usuario invalido!!"}, status=400)
+        except Tutor.DoesNotExist:
+            return JsonResponse({"mensaje": "Usuario invalido!!"}, status=404)
+        #resp_data = {'cantidadCursos': 1 }
 
 # @csrf_exempt
 # def loginAlunmo(request):
@@ -267,3 +291,17 @@ def uploadImageAlumno(request):
         except Alumno.DoesNotExist:
             return JsonResponse("Error al actualizar la imagen del alumno", safe=False)
 
+@csrf_exempt
+def uploadImageApoderado(request):
+    if request.method == 'POST':
+        try:
+            user = Tutor.objects.get(codigoTutor=request.POST.get('codigoTutor'))
+            upload = request.FILES['imagen']
+            fss = FileSystemStorage(location='media/apoderado/')
+            file = fss.save(upload.name, upload)
+            # file_url = fss.url(file)
+            user.imagen = 'apoderado/'+upload.name
+            user.save()
+            return JsonResponse("Imagen del apoderado actualizado exitosamente!!", safe=False)
+        except Tutor.DoesNotExist:
+            return JsonResponse("Error al actualizar la imagen del apoderado", safe=False)

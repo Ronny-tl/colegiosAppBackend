@@ -114,3 +114,14 @@ class MatriculaSerializer(serializers.ModelSerializer):
             'precioCurso': instance.codigoCurso.precio,
             'monto': instance.monto
         }
+
+class AlumnoTutorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Alumno
+        fields=('codigoAlumno', 'nombres', 'apellidos')
+    def to_representation(self, instance):
+        return {
+            'codigoAlumno': instance.codigoAlumno,
+            'nombres': instance.nombres,
+            'apellidos': instance.apellidos
+        }
